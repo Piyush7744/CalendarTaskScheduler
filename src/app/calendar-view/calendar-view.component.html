@@ -2,47 +2,50 @@
 
 
 <div *ngIf="formOpen" class="formDisplay">
-    <div class="field">
-        <mat-form-field>
-            <mat-label>Title</mat-label>
-            <input matInput [(ngModel)]="form.title">
-        </mat-form-field>
-    </div>
-    <div>
-        <mat-form-field>
-            <mat-label>Bill type</mat-label>
-            <input matInput [(ngModel)]="form.type">
-        </mat-form-field>
-    </div>
-    <div>
-        <mat-form-field>
-            <mat-label>Amount</mat-label>
-            <input matInput [(ngModel)]="form.amount">
-        </mat-form-field>
-    </div>
-    <div>
-        <mat-form-field class="dateField">
-            <mat-label>Choose a date</mat-label>
-            <input matInput [matDatepicker]="picker" [(ngModel)]="form.date">
-            <mat-hint>MM/DD/YYYY</mat-hint>
-            <mat-datepicker-toggle matIconSuffix [for]="picker">
-                <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-            </mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
-    </div>
-    <div>
-        <mat-form-field>
-            <mat-label>Textarea</mat-label>
-            <textarea matInput [(ngModel)]="form.description"></textarea>
-        </mat-form-field>
-    </div>
+    <form [formGroup]="form" (ngSubmit)="submitForm()">
+        <div class="field">
+            <mat-form-field>
+                <mat-label>Title</mat-label>
+                <input matInput formControlName="title" name="title">
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field>
+                <mat-label>Bill type</mat-label>
+                <input matInput formControlName="type" name="type">
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field>
+                <mat-label>Amount</mat-label>
+                <input type="number" matInput formControlName="amount" name="amount">
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field class="dateField">
+                <mat-label>Choose a date</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="date" name="date">
+                <mat-hint>MM/DD/YYYY</mat-hint>
+                <mat-datepicker-toggle matIconSuffix [for]="picker">
+                    <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+                </mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field>
+                <mat-label>Textarea</mat-label>
+                <textarea matInput formControlName="description" name="description"></textarea>
+            </mat-form-field>
+        </div>
 
-    <div>
-        <button class="submitButton" mat-raised-button color="primary" (click)="submitForm()">Submit</button>
-        <button class="closeButton" mat-raised-button color="accent" (click)="closeForm()">Close</button>
-    </div>
-
+        <div>
+            <button type="submit" class="submitButton" mat-raised-button color="primary"
+                (click)="submitForm()">Submit</button>
+            <button type="button" class="closeButton" mat-raised-button color="accent"
+                (click)="closeForm()">Close</button>
+        </div>
+    </form>
 </div>
 
 <div *ngIf="filter" class="filterForm">
@@ -56,4 +59,5 @@
         <button mat-raised-button color="primary" (click)="filterEvents()">Filter</button>
         <button mat-raised-button color="accent" (click)="closeForm()" class="closeButton">Close</button>
     </div>
+
 </div>

@@ -5,15 +5,8 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { formatDate } from '@angular/common';
 import { DialogComponent } from '../dialog/dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
-
-interface formData {
-  title: string,
-  amount: number,
-  description: string,
-  type: string,
-  date: string,
-}
 
 @Component({
   selector: 'app-calendar-view',
@@ -24,13 +17,7 @@ export class CalendarViewComponent implements OnInit {
   formOpen: boolean = false;
   filter: boolean = false;
   filterValue: string = '';
-  form: formData = {
-    title: '',
-    date: '',
-    type: '',
-    amount: 0,
-    description: ''
-  }
+  form: FormGroup;
 
   calendarOptions = {
     plugins: [dayGridPlugin, interactionPlugin],
@@ -57,7 +44,16 @@ export class CalendarViewComponent implements OnInit {
     // In event i am showing amount as well with title initially it was only title
     eventContent: (arg) => {
       let customHtml = `<div>${arg.event.title}</div>`;
-      if (arg.event.extendedProps['description']) {
+      if (arg.view.type == 'dayGridMonth') {
+        customHtml += `<div class="event-description">${arg.event.extendedProps['amount']}</div>`;
+      } else if (arg.view.type == 'dayGridWeek') {
+        customHtml += `<div class="event-description">${arg.event.extendedProps['status']}</div>`;
+        customHtml += `<div class="event-description">${arg.event.extendedProps['type']}</div>`;
+        customHtml += `<div class="event-description">${arg.event.extendedProps['amount']}</div>`;
+      } else if (arg.view.type == 'dayGridDay') {
+        customHtml += `<div class="event-description">${arg.event.extendedProps['status']}</div>`;
+        customHtml += `<div class="event-description">${arg.event.extendedProps['type']}</div>`;
+        customHtml += `<div class="event-description">${arg.event.extendedProps['description']}</div>`;
         customHtml += `<div class="event-description">${arg.event.extendedProps['amount']}</div>`;
       }
       return { html: customHtml };
@@ -73,6 +69,11 @@ export class CalendarViewComponent implements OnInit {
       myCustomButton2: {
         text: 'Filter',
         click: () => {
+          // here i am again updating before filtering to ensure all the data is present in events array.
+          if (localStorage.getItem('calendar')) {
+            const data = localStorage.getItem('calendar');
+            this.calendarOptions.events = JSON.parse(data);
+          }
           this.filter = true;
         }
       }
@@ -88,12 +89,20 @@ export class CalendarViewComponent implements OnInit {
     eventClick: this.handleEventClick.bind(this)
   };
 
-  constructor(public dialog: MatDialog) { }
+  constructor(public dialog: MatDialog, private fb: FormBuilder) {
+    this.form = this.fb.group({
+      title: ['', Validators.required],
+      amount: ['', Validators.required],
+      type: ['', Validators.required],
+      description: ['', Validators.required],
+      date: ['', Validators.required]
+    })
+  }
 
   ngOnInit(): void {
     if (localStorage.getItem('calendar')) {
       const data = localStorage.getItem('calendar');
-      this.calendarOptions.events = JSON.parse(data).events;
+      this.calendarOptions.events = JSON.parse(data);
     }
 
     const date = new Date();
@@ -141,19 +150,21 @@ export class CalendarViewComponent implements OnInit {
   // update the calendarOptions and here i am storing calendarOptions in my localStorage so if user by mistakely
   // refreshes the page then also his/her event will remain unChanged.
   submitForm() {
-    const date = new Date(this.form.date);
-    const date2 = formatDate(date, 'yyyy-MM-dd', 'en-US')
-    // taking current events data.
-    const data: any = this.calendarOptions.events;
-    // adding new event of user.
-    const id = this.calendarOptions.events[this.calendarOptions.events.length - 1].extendedProps.id + 1;
-    data.push({ title: this.form.title, date: date2, extendedProps: { id: id, description: this.form.description, amount: this.form.amount, type: this.form.type, status: 'pending' } });
-    // updating calendarOptions events array.
-    this.calendarOptions.events = data;
-    // storing in localStorage.
-    localStorage.setItem('calendar', JSON.stringify(this.calendarOptions));
-    // closing the form.
-    this.formOpen = false;
+    if (this.form.valid) {
+      const date = new Date(this.form.value.date);
+      const date2 = formatDate(date, 'yyyy-MM-dd', 'en-US')
+      // taking current events data.
+      const data: any = this.calendarOptions.events;
+      // adding new event of user.
+      const id = this.calendarOptions.events[this.calendarOptions.events.length - 1].extendedProps.id + 1;
+      data.push({ title: this.form.value.title, date: date2, extendedProps: { id: id, description: this.form.value.description, amount: this.form.value.amount, type: this.form.value.type, status: 'pending' } });
+      // updating calendarOptions events array.
+      this.calendarOptions.events = data;
+      // closing the form.
+      this.formOpen = false;
+      // storing in localStorage.
+      localStorage.setItem('calendar', JSON.stringify(this.calendarOptions.events));
+    }
   }
   // this function is used for filtering based on user input.
   filterEvents() {
