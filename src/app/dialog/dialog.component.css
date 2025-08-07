@@ -1,0 +1,13 @@
+.dialogBox {
+
+    justify-items: center;
+    background-color: rgb(255, 250, 250);
+    border-radius: 15px;
+    width: 300px;
+    height: auto;
+    overflow: hidden;
+}
+
+.closeButton {
+    margin-left: 20px;
+}

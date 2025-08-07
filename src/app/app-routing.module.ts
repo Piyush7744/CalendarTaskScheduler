@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { CalendarViewComponent } from './calendar-view/calendar-view.component';
 
 const routes: Routes = [
-  {path:"calendar",component:CalendarViewComponent}
+  { path: "", component: CalendarViewComponent }
 ];
 
 @NgModule({
