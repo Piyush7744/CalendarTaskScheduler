@@ -7,6 +7,18 @@ import { DialogComponent } from '../dialog/dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
+export interface argument {
+  event: {
+    title: string,
+    extendedProps: {
+      status: string,
+      amount: number,
+      id: number,
+      description: string,
+      type: string,
+    }
+  }
+}
 
 @Component({
   selector: 'app-calendar-view',
@@ -108,21 +120,20 @@ export class CalendarViewComponent implements OnInit {
     const date = new Date();
     const todayDate = formatDate(date, 'yyyy-MM-dd', 'en-US');
     // here i am checking if is there any pending bill of user for today
-    this.calendarOptions.events.map(item => {
-      if (item.date == todayDate && item.extendedProps.status == 'pending') {
+    for (let i = 0; i < this.calendarOptions.events.length; i++) {
+      if (this.calendarOptions.events[i].date == todayDate && this.calendarOptions.events[i].extendedProps.status == 'pending') {
         alert("You have an pending Bill for today");
       }
-    })
+    }
   }
 
   // this function is for handling event click and it will open a dialogBox which is my
   // DialogBox Component and it is subscribing to its reference so whenever a closeDialogBox operation is
   // occured at dialogBox it will notify about that.
-  handleEventClick(args: any) {
-    console.log(args.event);
+  handleEventClick(args: argument) {
     let dialogRef = this.dialog.open(DialogComponent, { data: args });
     // this will get triggered when user click completed button.
-    dialogRef.afterClosed().subscribe(res => {
+    dialogRef.afterClosed().subscribe((res: argument) => {
       // storing all the events in data variable and updating the status of currentEvent that user just completed
       if (res) {
         let data = this.calendarOptions.events.filter(item => {
@@ -177,14 +188,16 @@ export class CalendarViewComponent implements OnInit {
     this.calendarOptions.events = data;
     // based on the filtered i am calculating due amount of the events and giving alert to the user.
     let dueAmount: number = 0;
-    this.calendarOptions.events.map(item => {
-      if (item.extendedProps.status == 'pending') {
-        // adding amount in dueAmount whose status is pending.
-        dueAmount += item.extendedProps.amount;
+
+    for (let i = 0; i < this.calendarOptions.events.length; i++) {
+      // adding amount in dueAmount whose status is pending.
+      if (this.calendarOptions.events[i].extendedProps.status == 'pending') {
+        dueAmount += this.calendarOptions.events[i].extendedProps.amount;
       }
-    })
+    }
 
     alert(`You have a due amount of ${dueAmount} for category ${this.filterValue}`);
-
   }
 }
+
+

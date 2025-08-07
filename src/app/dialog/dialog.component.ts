@@ -1,14 +1,17 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { argument } from '../calendar-view/calendar-view.component';
 @Component({
   selector: 'app-dialog',
   templateUrl: './dialog.component.html',
   styleUrls: ['./dialog.component.css']
 })
 export class DialogComponent {
-  constructor(@Inject(MAT_DIALOG_DATA) public eventData: any, private dialogRef: MatDialogRef<DialogComponent>) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public eventData: argument, private dialogRef: MatDialogRef<DialogComponent>) { }
   // this function will close the dialogBox.
   closeDialog() {
+    console.log(this.eventData);
+
     this.dialogRef.close();
   }
   // if user click complete button this function gets trigger.
