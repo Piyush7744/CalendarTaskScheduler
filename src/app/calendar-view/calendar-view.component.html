@@ -44,3 +44,16 @@
     </div>
 
 </div>
+
+<div *ngIf="filter" class="filterForm">
+    <div class="field">
+        <mat-form-field>
+            <mat-label>Title</mat-label>
+            <input matInput [(ngModel)]="filterValue">
+        </mat-form-field>
+    </div>
+    <div>
+        <button mat-raised-button color="primary" (click)="filterEvents()">Filter</button>
+        <button mat-raised-button color="accent" (click)="closeForm()" class="closeButton">Close</button>
+    </div>
+</div>

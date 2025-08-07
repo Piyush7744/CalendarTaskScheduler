@@ -22,6 +22,8 @@ interface formData {
 })
 export class CalendarViewComponent implements OnInit {
   formOpen: boolean = false;
+  filter: boolean = false;
+  filterValue: string = '';
   form: formData = {
     title: '',
     date: '',
@@ -36,19 +38,19 @@ export class CalendarViewComponent implements OnInit {
     headerToolbar: {
       left: 'prev,today,next',
       center: 'title',
-      right: 'dayGridMonth,dayGridWeek,dayGridDay myCustomButton'
+      right: 'myCustomButton2 dayGridMonth,dayGridWeek,dayGridDay myCustomButton'
     },
     height: '595px',
     weekends: true,
     events: [
       {
-        title: 'Event 1', date: '2025-08-10', extendedProps: { description: 'Discuss project progress', amount: 2000, status: 'pending' }
+        title: 'Event', date: '2025-08-10', extendedProps: { id: 1, description: 'Discuss project progress', type: 'test', amount: 2000, status: 'pending' }
       },
       {
-        title: 'Event 2', date: '2025-08-11', extendedProps: { description: 'Discuss project progress', amount: 2000, status: 'completed' }
+        title: 'Event 2', date: '2025-08-11', extendedProps: { id: 2, description: 'Discuss project progress', type: 'test1', amount: 2000, status: 'completed' }
       },
       {
-        title: 'Event 1', date: '2025-08-12', extendedProps: { description: 'Discuss project progress', amount: 2000, status: 'pending' }
+        title: 'Event', date: '2025-08-12', extendedProps: { id: 3, description: 'Discuss project progress', type: 'test', amount: 2000, status: 'pending' }
       },
 
     ],
@@ -66,6 +68,12 @@ export class CalendarViewComponent implements OnInit {
         text: 'Add Event',
         click: () => {
           this.formOpen = true
+        }
+      },
+      myCustomButton2: {
+        text: 'Filter',
+        click: () => {
+          this.filter = true;
         }
       }
     },
@@ -87,6 +95,15 @@ export class CalendarViewComponent implements OnInit {
       const data = localStorage.getItem('calendar');
       this.calendarOptions.events = JSON.parse(data).events;
     }
+
+    const date = new Date();
+    const todayDate = formatDate(date, 'yyyy-MM-dd', 'en-US');
+    // here i am checking if is there any pending bill of user for today
+    this.calendarOptions.events.map(item => {
+      if (item.date == todayDate && item.extendedProps.status == 'pending') {
+        alert("You have an pending Bill for today");
+      }
+    })
   }
 
   // this function is for handling event click and it will open a dialogBox which is my
@@ -98,23 +115,26 @@ export class CalendarViewComponent implements OnInit {
     // this will get triggered when user click completed button.
     dialogRef.afterClosed().subscribe(res => {
       // storing all the events in data variable and updating the status of currentEvent that user just completed
-      let data = this.calendarOptions.events.filter(item => {
-        if (item.title != res.event.title) {
-          return item;
-        } else {
-          // changing status of currentEvent
-          return item.extendedProps.status = 'completed';
-        }
-      })
-      // again updating value of events and localStorage after changing status
-      this.calendarOptions.events = data;
-      localStorage.setItem('calendar',JSON.stringify(this.calendarOptions));
+      if (res) {
+        let data = this.calendarOptions.events.filter(item => {
+          if (item.extendedProps.id != res.event.extendedProps.id) {
+            return item;
+          } else {
+            // changing status of currentEvent
+            return item.extendedProps.status = 'completed';
+          }
+        })
+        // again updating value of events and localStorage after changing status
+        this.calendarOptions.events = data;
+        localStorage.setItem('calendar', JSON.stringify(this.calendarOptions));
+      }
     })
   }
 
   // this is to close addEvent form if user want to dont add any event.
   closeForm() {
     this.formOpen = false;
+    this.filter = false;
   }
 
   // this function is used for updating calendarOptions events array if user adds a new event then it will 
@@ -126,12 +146,34 @@ export class CalendarViewComponent implements OnInit {
     // taking current events data.
     const data: any = this.calendarOptions.events;
     // adding new event of user.
-    data.push({ title: this.form.title, date: date2, extendedProps: { description: this.form.description, amount: this.form.amount, type: this.form.type, status: 'pending' } });
+    const id = this.calendarOptions.events[this.calendarOptions.events.length - 1].extendedProps.id + 1;
+    data.push({ title: this.form.title, date: date2, extendedProps: { id: id, description: this.form.description, amount: this.form.amount, type: this.form.type, status: 'pending' } });
     // updating calendarOptions events array.
     this.calendarOptions.events = data;
     // storing in localStorage.
     localStorage.setItem('calendar', JSON.stringify(this.calendarOptions));
     // closing the form.
     this.formOpen = false;
+  }
+  // this function is used for filtering based on user input.
+  filterEvents() {
+    // filtering data based on user input using filter method
+    const data = this.calendarOptions.events.filter(item => {
+      return item.extendedProps.type.toLowerCase().includes(this.filterValue.toLowerCase());
+    })
+    this.filter = false;
+    // updating calendar event and only adding the filtered events.
+    this.calendarOptions.events = data;
+    // based on the filtered i am calculating due amount of the events and giving alert to the user.
+    let dueAmount: number = 0;
+    this.calendarOptions.events.map(item => {
+      if (item.extendedProps.status == 'pending') {
+        // adding amount in dueAmount whose status is pending.
+        dueAmount += item.extendedProps.amount;
+      }
+    })
+
+    alert(`You have a due amount of ${dueAmount} for category ${this.filterValue}`);
+
   }
 }

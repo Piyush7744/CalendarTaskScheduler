@@ -7,7 +7,7 @@
         <h4>Description : {{eventData.event.extendedProps.description}}</h4>
     </div>
     <div class="dialogButtons">
-        <button mat-raised-button color="primary" (click)="completed()">Completed</button>
+        <button *ngIf="eventData.event.extendedProps.status=='pending'" mat-raised-button color="primary" (click)="completed()">Completed</button>
         <button mat-raised-button color="accent" (click)="closeDialog()" class="closeButton">Close</button>
     </div>
 
