@@ -78,3 +78,7 @@
     font-style: arial;
     font-size: 20px;
 }
+
+::ng-deep .mdc-label {
+    color: white;
+}

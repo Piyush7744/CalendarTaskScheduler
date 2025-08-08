@@ -1,5 +1,5 @@
-import { Component, DoCheck, OnInit } from '@angular/core';
-import { CalendarOptions } from '@fullcalendar/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { CalendarOptions, CalendarApi } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -8,6 +8,7 @@ import { DialogComponent } from '../dialog/dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
+import { FullCalendarComponent } from '@fullcalendar/angular';
 
 
 export interface argument {
@@ -44,6 +45,10 @@ interface tableData {
   styleUrls: ['./calendar-view.component.css']
 })
 export class CalendarViewComponent implements OnInit {
+
+  @ViewChild('fullCalendar') fullCalendar: FullCalendarComponent;
+  calendarApi: CalendarApi;
+
   formOpen: boolean = false;
   filter: boolean = false;
   filterValue: string = '';
@@ -65,7 +70,7 @@ export class CalendarViewComponent implements OnInit {
     headerToolbar: {
       left: 'prev,today,next',
       center: 'title',
-      right: 'myCustomButton2 dayGridMonth,dayGridWeek,dayGridDay customListView myCustomButton'
+      right: 'myCustomButton2 myCustomButton'
     },
     height: '595px',
     weekends: true,
@@ -182,11 +187,7 @@ export class CalendarViewComponent implements OnInit {
       const data = localStorage.getItem('calendar');
       this.calendarOptions.events = JSON.parse(data);
       this.dataSource.data = JSON.parse(data);
-      console.log(JSON.parse(data));
-
-      console.log("dataSource", this.dataSource.data);
     }
-
     const date = new Date();
     const todayDate = formatDate(date, 'yyyy-MM-dd', 'en-US');
     // here i am checking if is there any pending bill of user for today
@@ -195,6 +196,11 @@ export class CalendarViewComponent implements OnInit {
         alert("You have an pending Bill for today");
       }
     }
+  }
+
+  changeCalendarView(viewName: string) {
+    if (viewName != 'customViewList')
+      this.fullCalendar.getApi().changeView(viewName);
   }
 
   // this function is for handling event click and it will open a dialogBox which is my
@@ -222,11 +228,11 @@ export class CalendarViewComponent implements OnInit {
   }
 
   radioClick(args: argument) {
-    // if (args.view.type == "customListView") {
-    //   this.listView = true;
-    // } else {
-    //   this.listView = false;
-    // }
+    if (args.view.type == "customListView") {
+      this.listView = true;
+    } else {
+      this.listView = false;
+    }
   }
 
   // this is to close addEvent form if user want to dont add any event.
@@ -284,5 +290,3 @@ export class CalendarViewComponent implements OnInit {
     }
   }
 }
-
-

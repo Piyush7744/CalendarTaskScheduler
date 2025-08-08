@@ -1,10 +1,13 @@
-<!-- <mat-radio-group class="radioOptions">
-    <mat-radio-button value="option1" class="option">Month</mat-radio-button>
-    <mat-radio-button value="option2">Week</mat-radio-button>
-    <mat-radio-button value="option3">List</mat-radio-button>
-</mat-radio-group> -->
+<mat-radio-group class="radioOptions">
+    <mat-radio-button value="dayGridMonth" (click)=" changeCalendarView('dayGridMonth')" class="textHeading"
+        color="primary">Month</mat-radio-button>
+    <mat-radio-button value="dayGridWeek" (click)=" changeCalendarView('dayGridWeek')" class="textHeading"
+        color="primary">Week</mat-radio-button>
+    <mat-radio-button value="customListView" (click)=" changeCalendarView('customListView')"
+        class="textHeading" color="primary">List</mat-radio-button>
+</mat-radio-group>
 
-<full-calendar class="calendar" [options]="calendarOptions"></full-calendar>
+<full-calendar #fullCalendar class="calendar" [options]="calendarOptions"></full-calendar>
 
 
 <div *ngIf="formOpen" class="formDisplay">
