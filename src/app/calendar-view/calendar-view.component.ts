@@ -48,7 +48,7 @@ export class CalendarViewComponent implements OnInit {
 
   @ViewChild('fullCalendar') fullCalendar: FullCalendarComponent;
   calendarApi: CalendarApi;
-
+  view = 'dayGridMonth';
   formOpen: boolean = false;
   filter: boolean = false;
   filterValue: string = '';
@@ -168,8 +168,8 @@ export class CalendarViewComponent implements OnInit {
         info.el.style.backgroundColor = 'green';
       }
     },
-    eventClick: this.radioClick.bind(this),
-    datesSet: this.radioClick.bind(this)
+    eventClick: this.handleEventClick.bind(this),
+    datesSet: this.radioClick.bind(this),
   };
 
   constructor(public dialog: MatDialog, private fb: FormBuilder) {
@@ -222,7 +222,7 @@ export class CalendarViewComponent implements OnInit {
         })
         // again updating value of events and localStorage after changing status
         this.calendarOptions.events = data;
-        localStorage.setItem('calendar', JSON.stringify(this.calendarOptions));
+        localStorage.setItem('calendar', JSON.stringify(this.calendarOptions.events));
       }
     })
   }
@@ -266,9 +266,14 @@ export class CalendarViewComponent implements OnInit {
   // this function is used for filtering based on user input.
   filterEvents() {
     // filtering data based on user input using filter method
+    console.log("in filter method");
+    console.log(this.calendarOptions.events);
+
     const data = this.calendarOptions.events.filter(item => {
+      console.log("inside filter method");
       return item.extendedProps.type.toLowerCase().includes(this.filterValue.toLowerCase());
     })
+
     this.filter = false;
     // updating calendar event and only adding the filtered events.
     this.calendarOptions.events = data;

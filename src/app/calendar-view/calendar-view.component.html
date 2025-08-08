@@ -1,4 +1,4 @@
-<mat-radio-group class="radioOptions">
+<mat-radio-group class="radioOptions" [(ngModel)]="view">
     <mat-radio-button value="dayGridMonth" (click)=" changeCalendarView('dayGridMonth')" class="textHeading"
         color="primary">Month</mat-radio-button>
     <mat-radio-button value="dayGridWeek" (click)=" changeCalendarView('dayGridWeek')" class="textHeading"

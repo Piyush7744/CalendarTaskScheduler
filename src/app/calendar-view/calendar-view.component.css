@@ -14,7 +14,7 @@
 
 .radioOptions {
     position: absolute;
-    margin-left: 850px;
+    margin-left: 140vh;
 }
 
 .calendar {
@@ -81,4 +81,23 @@
 
 ::ng-deep .mdc-label {
     color: white;
+}
+
+::ng-deep mdc-radio-selected-focus-icon-color.mdc-radio-selected-focus-icon-color .mdc-radio-selected-focus-icon-color {
+    color: white !important;
+}
+
+::ng-deep .mat-mdc-radio-button.mat-primary {
+    --mdc-radio-disabled-selected-icon-color: #000;
+    --mdc-radio-disabled-unselected-icon-color: #000;
+    --mdc-radio-unselected-hover-icon-color: #212121;
+    --mdc-radio-unselected-icon-color: rgba(0, 0, 0, 0.54);
+    --mdc-radio-unselected-pressed-icon-color: rgba(0, 0, 0, 0.54);
+    --mdc-radio-selected-focus-icon-color: #edeef1;
+    --mdc-radio-selected-hover-icon-color: #edeef1;
+    --mdc-radio-selected-icon-color: #edeef1;
+    --mdc-radio-selected-pressed-icon-color: #edeef1;
+    --mat-radio-ripple-color: #000;
+    --mat-radio-checked-ripple-color: #edeef1;
+    --mat-radio-disabled-label-color: rgba(0, 0, 0, 0.38);
 }
