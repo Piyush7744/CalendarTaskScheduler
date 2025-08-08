@@ -9,8 +9,12 @@
     height: 500px;
     width: 400px;
     border-radius: 15px;
-
     box-shadow: 5px 5px 10px rgb(120, 118, 118);
+}
+
+.radioOptions {
+    position: absolute;
+    margin-left: 850px;
 }
 
 .calendar {
@@ -45,4 +49,32 @@
     width: 300px;
     border-radius: 15px;
     box-shadow: 5px 5px 10px rgb(120, 118, 118);
+}
+
+.tableEvent {
+    position: absolute;
+    inset: 0;
+    margin-top: 60px;
+    height: 100vh;
+    overflow: auto;
+    color: white;
+}
+
+.table {
+    background-color: #393E46;
+    height: 100vh;
+    color: white;
+    text-align: center;
+}
+
+.textWhite {
+    color: white;
+    font-style: arial;
+    font-size: 15px;
+}
+
+.textHeading {
+    color: white;
+    font-style: arial;
+    font-size: 20px;
 }

@@ -1,11 +1,14 @@
 import { Component, DoCheck, OnInit } from '@angular/core';
 import { CalendarOptions } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import { formatDate } from '@angular/common';
 import { DialogComponent } from '../dialog/dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatTableDataSource } from '@angular/material/table';
+
 
 export interface argument {
   event: {
@@ -17,6 +20,21 @@ export interface argument {
       description: string,
       type: string,
     }
+  },
+  view: {
+    type: string
+  }
+}
+
+interface tableData {
+  title: string,
+  date: string,
+  extendedProps: {
+    status: string,
+    amount: number,
+    id: number,
+    description: string,
+    type: string,
   }
 }
 
@@ -30,14 +48,24 @@ export class CalendarViewComponent implements OnInit {
   filter: boolean = false;
   filterValue: string = '';
   form: FormGroup;
+  eventsLength: number = 0;
+  listView: boolean = false;
+  dataSource = new MatTableDataSource<tableData>();
+  displayedColumns: string[] = ['id', 'date', 'name', 'status', 'amount', 'type', 'description'];
 
   calendarOptions = {
-    plugins: [dayGridPlugin, interactionPlugin],
+    plugins: [dayGridPlugin, interactionPlugin, listPlugin],
     initialView: 'dayGridMonth',
+    views: {
+      customListView: {
+        type: 'list',
+        duration: { days: 10 }
+      }
+    },
     headerToolbar: {
       left: 'prev,today,next',
       center: 'title',
-      right: 'myCustomButton2 dayGridMonth,dayGridWeek,dayGridDay myCustomButton'
+      right: 'myCustomButton2 dayGridMonth,dayGridWeek,dayGridDay customListView myCustomButton'
     },
     height: '595px',
     weekends: true,
@@ -67,6 +95,8 @@ export class CalendarViewComponent implements OnInit {
         customHtml += `<div class="event-description">${arg.event.extendedProps['type']}</div>`;
         customHtml += `<div class="event-description">${arg.event.extendedProps['description']}</div>`;
         customHtml += `<div class="event-description">${arg.event.extendedProps['amount']}</div>`;
+      } else if (arg.view.type == 'customListView') {
+        customHtml = '';
       }
       return { html: customHtml };
     },
@@ -85,6 +115,7 @@ export class CalendarViewComponent implements OnInit {
           if (localStorage.getItem('calendar')) {
             const data = localStorage.getItem('calendar');
             this.calendarOptions.events = JSON.parse(data);
+            this.dataSource.data = JSON.parse(data);
           }
           this.filter = true;
         }
@@ -98,7 +129,8 @@ export class CalendarViewComponent implements OnInit {
         info.el.style.backgroundColor = 'green';
       }
     },
-    eventClick: this.handleEventClick.bind(this)
+    eventClick: this.radioClick.bind(this),
+    datesSet: this.radioClick.bind(this)
   };
 
   constructor(public dialog: MatDialog, private fb: FormBuilder) {
@@ -115,6 +147,10 @@ export class CalendarViewComponent implements OnInit {
     if (localStorage.getItem('calendar')) {
       const data = localStorage.getItem('calendar');
       this.calendarOptions.events = JSON.parse(data);
+      this.dataSource.data = JSON.parse(data);
+      console.log(JSON.parse(data));
+
+      console.log("dataSource", this.dataSource.data);
     }
 
     const date = new Date();
@@ -151,6 +187,14 @@ export class CalendarViewComponent implements OnInit {
     })
   }
 
+  radioClick(args: argument) {
+    if (args.view.type == "customListView") {
+      this.listView = true;
+    } else {
+      this.listView = false;
+    }
+  }
+
   // this is to close addEvent form if user want to dont add any event.
   closeForm() {
     this.formOpen = false;
@@ -162,6 +206,8 @@ export class CalendarViewComponent implements OnInit {
   // refreshes the page then also his/her event will remain unChanged.
   submitForm() {
     if (this.form.valid) {
+      console.log(this.form.value.date);
+
       const date = new Date(this.form.value.date);
       const date2 = formatDate(date, 'yyyy-MM-dd', 'en-US')
       // taking current events data.
@@ -186,6 +232,7 @@ export class CalendarViewComponent implements OnInit {
     this.filter = false;
     // updating calendar event and only adding the filtered events.
     this.calendarOptions.events = data;
+    this.dataSource.data = data;
     // based on the filtered i am calculating due amount of the events and giving alert to the user.
     let dueAmount: number = 0;
 
@@ -196,7 +243,11 @@ export class CalendarViewComponent implements OnInit {
       }
     }
 
-    alert(`You have a due amount of ${dueAmount} for category ${this.filterValue}`);
+    if (this.calendarOptions.events.length == 0) {
+      alert(`You don't have any category ${this.filterValue}`);
+    } else {
+      alert(`You have a due amount of ${dueAmount} for category ${this.filterValue}`);
+    }
   }
 }
 

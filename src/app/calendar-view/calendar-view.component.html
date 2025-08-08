@@ -1,3 +1,9 @@
+<!-- <mat-radio-group class="radioOptions">
+    <mat-radio-button value="option1" class="option">Month</mat-radio-button>
+    <mat-radio-button value="option2">Week</mat-radio-button>
+    <mat-radio-button value="option3">List</mat-radio-button>
+</mat-radio-group> -->
+
 <full-calendar class="calendar" [options]="calendarOptions"></full-calendar>
 
 
@@ -60,4 +66,49 @@
         <button mat-raised-button color="accent" (click)="closeForm()" class="closeButton">Close</button>
     </div>
 
+</div>
+
+
+<div *ngIf="listView" class="tableEvent">
+    <mat-table [dataSource]="dataSource" class="table">
+
+        <ng-container matColumnDef="id">
+            <mat-header-cell *matHeaderCellDef class="textWhite"> Id </mat-header-cell>
+            <mat-cell *matCellDef="let element" class="textWhite">{{ element.extendedProps.id }} </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+            <mat-header-cell *matHeaderCellDef class="textWhite"> Date </mat-header-cell>
+            <mat-cell *matCellDef="let element" class="textWhite">{{ element.date }} </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef class="textWhite"> Title </mat-header-cell>
+            <mat-cell *matCellDef="let element" class="textWhite">{{ element.title }} </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+            <mat-header-cell *matHeaderCellDef class="textHeading"> Status </mat-header-cell>
+            <mat-cell *matCellDef="let element" class="textWhite">{{ element.extendedProps.status }} </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="amount">
+            <mat-header-cell *matHeaderCellDef class="textHeading"> Amount </mat-header-cell>
+            <mat-cell *matCellDef="let element" class="textWhite"> {{ element.extendedProps.amount }} </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+            <mat-header-cell *matHeaderCellDef class="textHeading"> Type </mat-header-cell>
+            <mat-cell *matCellDef="let element" class="textWhite"> {{ element.extendedProps.type }} </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="description">
+            <mat-header-cell *matHeaderCellDef class="textHeading"> Description </mat-header-cell>
+            <mat-cell *matCellDef="let element" class="textWhite"> {{ element.extendedProps.description }} </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+
+    </mat-table>
 </div>
