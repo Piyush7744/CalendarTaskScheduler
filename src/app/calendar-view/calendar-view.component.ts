@@ -68,9 +68,9 @@ export class CalendarViewComponent implements OnInit {
       }
     },
     headerToolbar: {
-      left: 'prev,today,next',
-      center: 'title',
-      right: 'myCustomButton2 myCustomButton'
+      left: '',
+      center: 'prev title next',
+      right: 'today myCustomButton2 myCustomButton'
     },
     height: '595px',
     weekends: true,

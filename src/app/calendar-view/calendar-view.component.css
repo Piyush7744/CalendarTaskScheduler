@@ -12,9 +12,14 @@
     box-shadow: 5px 5px 10px rgb(120, 118, 118);
 }
 
+::ng-deep .fc-toolbar-chunk {
+    display: flex;
+    align-items: center;
+}
+
+
 .radioOptions {
     position: absolute;
-    margin-left: 140vh;
 }
 
 .calendar {
