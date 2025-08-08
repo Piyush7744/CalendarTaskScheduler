@@ -97,6 +97,40 @@ export class CalendarViewComponent implements OnInit {
         customHtml += `<div class="event-description">${arg.event.extendedProps['amount']}</div>`;
       } else if (arg.view.type == 'customListView') {
         customHtml = '';
+        customHtml += `<table>
+                        <tr>
+                          <th>
+                          Status
+                          </th>
+                          <th>
+                          Type
+                          </th>
+
+                          <th>
+                          Description
+                          </th>
+                          <th>
+                          Amount
+                          </th>
+                      </tr>
+                      <tr>
+                      <td>
+                        ${arg.event.title}
+                      </td>
+                      <td>
+                      ${arg.event.extendedProps['status']}
+                      </td>
+                      <td>
+                      ${arg.event.extendedProps['type']}
+                      </td>
+                      <td>
+                      ${arg.event.extendedProps['description']}
+                      </td>
+                      <td>
+                      ${arg.event.extendedProps['amount']}
+                      </td>
+                      </tr>
+                      </table>`
       }
       return { html: customHtml };
     },
@@ -188,11 +222,11 @@ export class CalendarViewComponent implements OnInit {
   }
 
   radioClick(args: argument) {
-    if (args.view.type == "customListView") {
-      this.listView = true;
-    } else {
-      this.listView = false;
-    }
+    // if (args.view.type == "customListView") {
+    //   this.listView = true;
+    // } else {
+    //   this.listView = false;
+    // }
   }
 
   // this is to close addEvent form if user want to dont add any event.
