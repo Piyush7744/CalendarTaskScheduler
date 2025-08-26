@@ -1,14 +1,18 @@
 <div class="dialogBox">
     <div>
         <h4>Name : {{eventData.event.title}}</h4>
-        <h4>Amount : {{eventData.event.extendedProps.amount}}</h4>
+        <div>
+            <h4>Amount :</h4>
+            <input type="number" [(ngModel)]="amount">
+        </div>
+        <h4>Remaining Amount:{{remaining}}</h4>
         <h4>Type : {{eventData.event.extendedProps.type}}</h4>
         <h4>Status : {{eventData.event.extendedProps.status}}</h4>
         <h4>Description : {{eventData.event.extendedProps.description}}</h4>
     </div>
     <div class="dialogButtons">
-        <button *ngIf="eventData.event.extendedProps.status=='pending'" mat-raised-button color="primary" (click)="completed()">Completed</button>
+        <button *ngIf="eventData.event.extendedProps.status=='pending'" mat-raised-button color="primary"
+            (click)="completed()">Completed</button>
         <button mat-raised-button color="accent" (click)="closeDialog()" class="closeButton">Close</button>
     </div>
-
 </div>

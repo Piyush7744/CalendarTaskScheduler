@@ -9,6 +9,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { FullCalendarComponent } from '@fullcalendar/angular';
+import { EventData, EventService } from '../services/Event/event.service';
+
 
 
 export interface argument {
@@ -25,6 +27,13 @@ export interface argument {
   view: {
     type: string
   }
+  updatedAmount: number
+}
+
+export interface amounts {
+  id: number,
+  eid: number,
+  amount: number
 }
 
 interface tableData {
@@ -55,8 +64,22 @@ export class CalendarViewComponent implements OnInit {
   form: FormGroup;
   eventsLength: number = 0;
   listView: boolean = false;
+  addEventData = {
+    title: '',
+    status: '',
+    amount: 0,
+    description: '',
+    Etype: '',
+    Edate: ''
+  };
   dataSource = new MatTableDataSource<tableData>();
   displayedColumns: string[] = ['id', 'date', 'name', 'status', 'amount', 'type', 'description'];
+  eventData: EventData[] = [];
+  pastAmountArray: amounts[] = []
+  emailData = {
+    subject: '',
+    message: ''
+  }
 
   calendarOptions = {
     plugins: [dayGridPlugin, interactionPlugin, listPlugin],
@@ -75,16 +98,6 @@ export class CalendarViewComponent implements OnInit {
     height: '595px',
     weekends: true,
     events: [
-      {
-        title: 'Event', date: '2025-08-10', extendedProps: { id: 1, description: 'Discuss project progress', type: 'test', amount: 2000, status: 'pending' }
-      },
-      {
-        title: 'Event 2', date: '2025-08-11', extendedProps: { id: 2, description: 'Discuss project progress', type: 'test1', amount: 2000, status: 'completed' }
-      },
-      {
-        title: 'Event', date: '2025-08-12', extendedProps: { id: 3, description: 'Discuss project progress', type: 'test', amount: 2000, status: 'pending' }
-      },
-
     ],
     // In event i am showing amount as well with title initially it was only title
     eventContent: (arg) => {
@@ -151,11 +164,12 @@ export class CalendarViewComponent implements OnInit {
         text: 'Filter',
         click: () => {
           // here i am again updating before filtering to ensure all the data is present in events array.
-          if (localStorage.getItem('calendar')) {
-            const data = localStorage.getItem('calendar');
-            this.calendarOptions.events = JSON.parse(data);
-            this.dataSource.data = JSON.parse(data);
-          }
+          // if (localStorage.getItem('calendar')) {
+          //   const data = localStorage.getItem('calendar');
+          //   this.calendarOptions.events = JSON.parse(data);
+          //   this.dataSource.data = JSON.parse(data);
+          // }
+          this.getData();
           this.filter = true;
         }
       }
@@ -172,7 +186,7 @@ export class CalendarViewComponent implements OnInit {
     datesSet: this.radioClick.bind(this),
   };
 
-  constructor(public dialog: MatDialog, private fb: FormBuilder) {
+  constructor(public dialog: MatDialog, private fb: FormBuilder, private service: EventService) {
     this.form = this.fb.group({
       title: ['', Validators.required],
       amount: ['', Validators.required],
@@ -180,14 +194,16 @@ export class CalendarViewComponent implements OnInit {
       description: ['', Validators.required],
       date: ['', Validators.required]
     })
+
+    if (localStorage.getItem('token')) {
+      // const data = localStorage.getItem('calendar');
+      // this.calendarOptions.events = JSON.parse(data);
+      // this.dataSource.data = JSON.parse(data);
+      this.getData();
+    }
   }
 
   ngOnInit(): void {
-    if (localStorage.getItem('calendar')) {
-      const data = localStorage.getItem('calendar');
-      this.calendarOptions.events = JSON.parse(data);
-      this.dataSource.data = JSON.parse(data);
-    }
     const date = new Date();
     const todayDate = formatDate(date, 'yyyy-MM-dd', 'en-US');
     // here i am checking if is there any pending bill of user for today
@@ -196,6 +212,30 @@ export class CalendarViewComponent implements OnInit {
         alert("You have an pending Bill for today");
       }
     }
+  }
+
+  getData() {
+    this.service.getEvent().subscribe((data: EventData[]) => {
+      this.eventData = data;
+      const newData = [];
+      for (let i = 0; i < this.eventData.length; i++) {
+        const date = new Date(this.eventData[i].Edate);
+        const date2 = formatDate(date, 'yyyy-MM-dd', 'en-US');
+        const event = {
+          title: this.eventData[i].title,
+          date: date2.toString(),
+          extendedProps: {
+            id: this.eventData[i].id,
+            status: this.eventData[i].status,
+            amount: this.eventData[i].amount,
+            type: this.eventData[i].Etype,
+            description: this.eventData[i].description
+          }
+        }
+        newData.push(event);
+      }
+      this.calendarOptions.events = newData;
+    })
   }
 
   changeCalendarView(viewName: string) {
@@ -212,17 +252,42 @@ export class CalendarViewComponent implements OnInit {
     dialogRef.afterClosed().subscribe((res: argument) => {
       // storing all the events in data variable and updating the status of currentEvent that user just completed
       if (res) {
-        let data = this.calendarOptions.events.filter(item => {
-          if (item.extendedProps.id != res.event.extendedProps.id) {
-            return item;
-          } else {
-            // changing status of currentEvent
-            return item.extendedProps.status = 'completed';
+        this.pastAmountArray = [];
+        const event = {
+          eid: res.event.extendedProps.id,
+          amount: res.updatedAmount
+        }
+        this.service.updateAmount(event).subscribe({
+          next: () => {
+            console.log("Updated amount successfully");
+            this.service.pastAmount(res.event.extendedProps.id).subscribe((data: amounts[]) => {
+              this.pastAmountArray = data;
+              let total = 0;
+              for (let i = 0; i < this.pastAmountArray.length; i++) {
+                total += this.pastAmountArray[i].amount;
+              }
+              console.log(total >= res.event.extendedProps.amount);
+
+              if (total == res.event.extendedProps.amount) {
+                this.service.updateStatus(res.event.extendedProps.id).subscribe({
+                  next: () => {
+                    this.getData();
+                    this.emailData.subject = 'Event completed'
+                    this.emailData.message = `You have completed your event of category ${res.event.extendedProps.type} named as ${res.event.title} of rupees ${res.event.extendedProps.amount}`
+                    this.service.emailMessage(this.emailData).subscribe({
+                      next: () => {
+                        console.log("Email sent Successfully");
+
+                      }
+                    })
+                    // localStorage.setItem('calendar', JSON.stringify(this.calendarOptions.events));
+                  }
+                })
+              }
+            })
           }
         })
-        // again updating value of events and localStorage after changing status
-        this.calendarOptions.events = data;
-        localStorage.setItem('calendar', JSON.stringify(this.calendarOptions.events));
+
       }
     })
   }
@@ -246,34 +311,55 @@ export class CalendarViewComponent implements OnInit {
   // refreshes the page then also his/her event will remain unChanged.
   submitForm() {
     if (this.form.valid) {
-      console.log(this.form.value.date);
+      const data = this.form.value;
+      const date = new Date(data.date);
+      const date2 = formatDate(date, 'yyyy-MM-dd', 'en-US');
+      console.log(this.form.value);
 
-      const date = new Date(this.form.value.date);
-      const date2 = formatDate(date, 'yyyy-MM-dd', 'en-US')
-      // taking current events data.
-      const data: any = this.calendarOptions.events;
-      // adding new event of user.
-      const id = this.calendarOptions.events[this.calendarOptions.events.length - 1].extendedProps.id + 1;
-      data.push({ title: this.form.value.title, date: date2, extendedProps: { id: id, description: this.form.value.description, amount: this.form.value.amount, type: this.form.value.type, status: 'pending' } });
-      // updating calendarOptions events array.
-      this.calendarOptions.events = data;
-      // closing the form.
+      this.addEventData.title = data.title;
+      this.addEventData.Edate = date2;
+      this.addEventData.description = data.description;
+      this.addEventData.status = "pending";
+      this.addEventData.amount = data.amount;
+      this.addEventData.Etype = data.type;
+      this.service.addEvent(this.addEventData).subscribe({
+        next: (res) => {
+          console.log("Successfully added event");
+          this.getData();
+          this.emailData.subject = `New event ${data.title}`
+          this.emailData.message = `<html><body>
+          <h3>Here is your Event detials:</h3>
+                                      <table border='1'>
+                                      <tr>
+                                        <th>Event Name</th>
+                                        <th>Event Amount</th>
+                                        <th>Event Date</th>
+                                      </tr>
+                                      <tr>
+                                        <td>${data.title}</td>
+                                        <td>${data.amount}</td>
+                                        <td> ${date2}</td>
+                                      </tr>
+                                      </table>            
+                                    </body></html>`
+          this.service.emailMessage(this.emailData).subscribe({
+            next: () => {
+              console.log("Email sent");
+
+            }
+          })
+        }
+      }
+      )
       this.formOpen = false;
-      // storing in localStorage.
-      localStorage.setItem('calendar', JSON.stringify(this.calendarOptions.events));
+      // localStorage.setItem('calendar', JSON.stringify(this.calendarOptions.events));
     }
   }
   // this function is used for filtering based on user input.
   filterEvents() {
-    // filtering data based on user input using filter method
-    console.log("in filter method");
-    console.log(this.calendarOptions.events);
-
     const data = this.calendarOptions.events.filter(item => {
-      console.log("inside filter method");
       return item.extendedProps.type.toLowerCase().includes(this.filterValue.toLowerCase());
     })
-
     this.filter = false;
     // updating calendar event and only adding the filtered events.
     this.calendarOptions.events = data;

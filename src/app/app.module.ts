@@ -20,13 +20,19 @@ import { DialogComponent } from './dialog/dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatTableModule } from '@angular/material/table';
+import { RegisterComponent } from './register/register.component';
+import { LoginComponent } from './login/login.component';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { Interceptor } from './interceptor/interceptor.interceptor';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     CalendarViewComponent,
-    DialogComponent
+    DialogComponent,
+    RegisterComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
@@ -44,10 +50,16 @@ import { MatTableModule } from '@angular/material/table';
     MatDialogModule,
     ReactiveFormsModule,
     MatRadioModule,
-    MatTableModule
+    MatTableModule,
+    HttpClientModule
 
   ],
-  providers: [NativeDateAdapter],
+  providers: [NativeDateAdapter,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: Interceptor,
+      multi: true
+    }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
